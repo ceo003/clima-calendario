@@ -451,3 +451,12 @@ function initMap(lat, lon, cityName = 'Localização') {
         });
     }
 }
+
+// Atualizar o tamanho do mapa ao redimensionar a janela para responsividade
+window.addEventListener('resize', () => {
+    if (map) {
+        setTimeout(() => {
+            map.invalidateSize();
+        }, 200);
+    }
+});
