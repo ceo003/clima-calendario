@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clima & Calendário</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Leaflet CSS para o mapa -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+</head>
+<script>
+    const cidades = ['Maputo', 'Beira', 'Nampula', 'Quelimane', 'Pemba'];
+
+    async function atualizarTemperatura(city) {
+        try {
+            const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1`);
+            const data = await res.json();
+            if (!data.results || data.results.length === 0) return;
+
+            const { latitude, longitude } = data.results[0];
+            const climaRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m&timezone=auto`);
+            const climaData = await climaRes.json();
+            const temperatura = Math.round(climaData.current.temperature_2m);
+
+            const tempSpan = document.getElementById(`temp-${city}`);
+            if (tempSpan) tempSpan.textContent = `${temperatura}°`;
+        } catch (e) {
+            console.error('Erro ao buscar temperatura para', city);
+        }
+    }
+
+    cidades.forEach(atualizarTemperatura);
+</script>
+
+<body>
+    <div class="container">
+        <!-- Barra de pesquisa principal -->
+        <div class="top-search-container">
+            <div class="search-box">
+                <input type="text" id="city-input" placeholder="Pesquisar localização...">
+                <button id="search-btn"><i class="fas fa-search"></i></button>
+            </div>
+            <div id="city-suggestions" class="suggestions-container"></div>
+        </div>
+        
+        <!-- Cidades populares moçambicanas -->
+<div class="popular-cities">
+    <div class="city-pill">Maputo <span class="temp" id="temp-Maputo">--°</span></div>
+    <div class="city-pill">Beira <span class="temp" id="temp-Beira">--°</span></div>
+    <div class="city-pill">Nampula <span class="temp" id="temp-Nampula">--°</span></div>
+    <div class="city-pill">Quelimane <span class="temp" id="temp-Quelimane">--°</span></div>
+    <div class="city-pill">Pemba <span class="temp" id="temp-Pemba">--°</span></div>
+</div>
+
+
+        <!-- Localização atual e botão de dispositivo -->
+        <div class="current-location-bar">
+            <div class="location-with-icon">
+                <i class="fas fa-map-marker-alt"></i>
+                <span id="city-name" class="city-name">Tete, Moçambique</span>
+                <i class="fas fa-chevron-down"></i>
+            </div>
+            <button id="location-btn" class="device-btn">
+                <i class="fas fa-mobile-alt"></i> Dispositivo
+            </button>
+        </div>
+
+        <main>
+            <!-- Left Section: Weather Info -->
+            <section class="weather-section">
+                <div class="weather-card">
+                    <div class="weather-header">
+                        <h3>Meteorologia atual</h3>
+                        <span class="current-time" id="current-time">16:13</span>
+                    </div>
+                    
+                
+                    
+                    <div class="weather-info">
+                        <div id="current-weather" class="weather-display">
+                            <div class="temp-container">
+                                <img id="weather-icon" src="https://openweathermap.org/img/wn/01d@2x.png" alt="Condição climática">
+                                <div class="temperature">
+                                    <span id="temperature">35</span><span class="unit">°C</span>
+                                </div>
+                            </div>
+                            <div class="weather-label">
+                                <p>Sol</p>
+                                <p>Sensação térmica <span id="feels-like">37°</span></p>
+                            </div>
+                            <div class="weather-description">
+                                <p id="weather-description">Hoje o céu vai estar geralmente limpo. A máxima atingirá 35°.</p>
+                            </div>
+                            
+                            <div class="weather-metrics">
+                                <div class="metric">
+                                    <span class="metric-label">Qualidade do ar</span>
+                                    <div class="metric-value">
+                                        <span class="quality-dot"></span>
+                                        <span class="quality-value">67</span>
+                                    </div>
+                                </div>
+                                <div class="metric">
+                                    <span class="metric-label">Vento</span>
+                                    <div class="metric-value">
+                                        <span id="wind-speed">6 km/h</span>
+                                        <i class="fas fa-arrow-down"></i>
+                                    </div>
+                                </div>
+                                <div class="metric">
+                                    <span class="metric-label">Humidade</span>
+                                    <div class="metric-value">
+                                        <span id="humidity">40%</span>
+                                    </div>
+                                </div>
+                                <div class="metric">
+                                    <span class="metric-label">Visibilidade</span>
+                                    <div class="metric-value">
+                                        <span>10 km</span>
+                                    </div>
+                                </div>
+                                <div class="metric">
+                                    <span class="metric-label">Pressão</span>
+                                    <div class="metric-value">
+                                        <span>1011 mb</span>
+                                    </div>
+                                </div>
+                                <div class="metric">
+                                    <span class="metric-label">Ponto orvalho</span>
+                                    <div class="metric-value">
+                                        <span>19°</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                
+                <!-- Daily Forecast -->
+                <div class="daily-forecast">
+                    <div class="forecast-day">
+                        <div class="day-name">24<br>sábado</div>
+                        <div class="day-icon"><img src="https://openweathermap.org/img/wn/02d@2x.png" alt="Clima"></div>
+                        <div class="day-temp">26°<br><span class="min-temp">17°</span></div>
+                    </div>
+                    <div class="forecast-day">
+                        <div class="day-name">25<br>domingo</div>
+                        <div class="day-icon"><img src="https://openweathermap.org/img/wn/02d@2x.png" alt="Clima"></div>
+                        <div class="day-temp">25°<br><span class="min-temp">18°</span></div>
+                    </div>
+                    <div class="forecast-day">
+                        <div class="day-name">26<br>segunda</div>
+                        <div class="day-icon"><img src="https://openweathermap.org/img/wn/01d@2x.png" alt="Clima"></div>
+                        <div class="day-temp">28°<br><span class="min-temp">18°</span></div>
+                    </div>
+                    <div class="forecast-day">
+                        <div class="day-name">27<br>terça</div>
+                        <div class="day-icon"><img src="https://openweathermap.org/img/wn/01d@2x.png" alt="Clima"></div>
+                        <div class="day-temp">30°<br><span class="min-temp">17°</span></div>
+                    </div>
+                    <div class="forecast-day selected">
+                        <div class="day-name">28<br>quarta</div>
+                        <div class="day-icon">
+                            <img src="https://openweathermap.org/img/wn/01d@2x.png" alt="Clima" class="day-icon-img">
+                        </div>
+                        <div class="day-temp">30°<br><span class="min-temp">17°</span></div>
+                    </div>
+                    <div class="forecast-day">
+                        <div class="day-name">29<br>quinta</div>
+                        <div class="day-icon"><img src="https://openweathermap.org/img/wn/02d@2x.png" alt="Clima"></div>
+                        <div class="day-temp">29°<br><span class="min-temp">16°</span></div>
+                    </div>
+                    <div class="forecast-day">
+                        <div class="day-name">30<br>sexta</div>
+                        <div class="day-icon"><img src="https://openweathermap.org/img/wn/02d@2x.png" alt="Clima"></div>
+                        <div class="day-temp">29°<br><span class="min-temp">16°</span></div>
+                    </div>
+                </div>
+            </section>
+            
+            
+            
+            
+           <!-- Right Section: Map -->
+            <section class="map-section">
+                <div id="map" class="weather-map"></div>
+                <div class="map-info">
+                    <button class="map-button" id="open-full-map">
+                        <i class="fas fa-map-marked-alt"></i>
+                        <span>Visualizar no Mapa Completo</span>
+                        <i class="fas fa-external-link-alt"></i>
+                    </button>
+                </div>
+            </section>
+            
+
+          
+            <div class="map-container">
+                <div id="map"></div>
+            </div>
+        </main>
+
+        <footer>
+            <p>© 2023 Clima & Calendário • Desenvolvido por Gemilson Mario Sarajabo</p>
+        </footer>
+    </div>
+
+    <!-- Leaflet JS para o mapa -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="script.js"></script>
+</body>
+</html> 
